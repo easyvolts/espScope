@@ -25,11 +25,14 @@ class I2S_AdcSampler
 	  	memset(dma_descriptor, 0, sizeof(dma_descriptor));
 	  	memset(frame, 0, sizeof(frame));
 	  	stopCountdown = 0;
+	  	lastBuffId = 0;
 	  }
 
 	  static bool init(const int XCLK, const int PCLK, const int Din[10]);
 	  static void start();
 	  static void stop(uint32_t buffCoutdown);
+	  static void stopNonBlocking(uint32_t buffCoutdown);
+	  static void cancel(void);
 	  static void oneFrame();
 	  static AdcSamplerState_e state();
 	  static uint16_t readSample(uint16_t sampleID);
@@ -39,6 +42,7 @@ class I2S_AdcSampler
 	  static uint32_t frame[3][500];
 	  static intr_handle_t i2sInterruptHandle;
 	  static volatile AdcSamplerState_e sys_state;
+	  static volatile uint8_t lastBuffId;
 	  static volatile uint8_t stopCountdown;
 	  static lldesc_t dma_descriptor[3]; //dma tickTackTock descriptor
 

@@ -34,6 +34,7 @@ typedef enum {
 intr_handle_t I2S_AdcSampler::i2sInterruptHandle;
 volatile I2S_AdcSampler::AdcSamplerState_e I2S_AdcSampler::sys_state;
 volatile uint8_t I2S_AdcSampler::stopCountdown;
+volatile uint8_t I2S_AdcSampler::lastBuffId;
 lldesc_t I2S_AdcSampler::dma_descriptor[3];
 uint32_t I2S_AdcSampler::frame[3][500]; //buffer before+at+after trigger (can be up to 4096 bytes each)
 
@@ -102,12 +103,30 @@ void I2S_AdcSampler::start()
 // buffCoutdown=3 -> we have 0 buffers before STOP, 0 recorded during STOP and 3 after;
 void I2S_AdcSampler::stop(uint32_t buffCoutdown)
 {
-	if(buffCoutdown > 3) buffCoutdown = 3;
+	if(BUSY != sys_state) return; //ignore stop request for inappropriate state
 
+	if(buffCoutdown > 3) buffCoutdown = 3;
 	stopCountdown = buffCoutdown;
 	sys_state = STOPPING;
 	while(READY != sys_state);
 	ESP_LOGD("Sampling stopped");
+}
+
+//end of sampling must be checked by user (using sys_state)
+void I2S_AdcSampler::stopNonBlocking(uint32_t buffCoutdown)
+{
+	if(BUSY != sys_state) return; //ignore stop request for inappropriate state
+
+	if(buffCoutdown > 3) buffCoutdown = 3;
+	stopCountdown = buffCoutdown;
+	sys_state = STOPPING;
+}
+
+//cancel data acquisition
+void I2S_AdcSampler::cancel(void)
+{
+	i2sStop();
+	sys_state = STOPPED;
 }
 
 void I2S_AdcSampler::oneFrame()
@@ -131,11 +150,24 @@ void IRAM_ATTR I2S_AdcSampler::i2sInterrupt(void* arg)
 		i2sStop();
 		sys_state = READY;
     }
+    lastBuffId = (lastBuffId + 1)%3;
 }
 
 uint16_t I2S_AdcSampler::readSample(uint16_t sampleID)
 {
-	uint32_t * samplePointer = &frame[0][0] + (sampleID/2);
+	uint32_t * samplePointer = NULL;
+	uint8_t buffId = 0;
+	uint16_t wordID = sampleID/2;
+	const uint16_t singleBuffSizeInWords = sizeof(frame[0])/4;
+
+	if(wordID >= 2*singleBuffSizeInWords) {
+		buffId = lastBuffId;
+	} else if(wordID >= 1*singleBuffSizeInWords) {
+		buffId = (lastBuffId+2)%3;
+	} else {
+		buffId = (lastBuffId+1)%3;
+	}
+	samplePointer = &frame[buffId][0] + wordID % singleBuffSizeInWords;
 
 	if(sampleID%2) {
 		return (uint16_t)*samplePointer;
@@ -164,6 +196,8 @@ void I2S_AdcSampler::i2sRun()
 {
     ESP_LOGD("I2S Run");
     esp_intr_disable(i2sInterruptHandle);
+    sys_state = BUSY;
+    lastBuffId = 0;
     i2sConfReset();
     I2S0.rx_eof_num = 0xFFFFFFFF;
     I2S0.in_link.addr = (uint32_t)&dma_descriptor[0];
