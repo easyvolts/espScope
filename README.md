@@ -15,3 +15,5 @@ Expected parameters are:
 8) initial hardware will be implemented as extension board for lowcost esp32 dev boards (like Wemos or DOIT esp32).
 
 Everybody is invited to contribute in this project.
+
+Some demonstration videos: https://youtu.be/cC0yg6h31-c     and     https://youtu.be/E5kDXbqxcd0
