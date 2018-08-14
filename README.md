@@ -17,3 +17,5 @@ Expected parameters are:
 Everybody is invited to contribute in this project.
 
 Some demonstration videos: https://youtu.be/cC0yg6h31-c     and     https://youtu.be/E5kDXbqxcd0
+
+NOTE: the project is stopped. If you are interested in reasons of the decision please read this article: https://easyvolts.com/2018/08/14/esp32-40msps-oscilloscope-project-is-closed-and-here-is-why/.
