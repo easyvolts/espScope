@@ -3,7 +3,7 @@
 
 
 #include <WiFiClient.h>
-#include <ESP32WebServer.h>
+#include <WebServer.h>
 #include <ESPmDNS.h>
 #include <WiFi.h>
 #include <Arduino.h>
@@ -44,7 +44,7 @@ typedef enum {falling = 0, rising = 1} TRIGGER_EDGE_E;
 typedef enum {stopTrig = 0, noneTrig = 1, autoTrig = 2, singleTrig = 3} TRIGGER_MODE_E;
 const char * triggerTexts[4] = {"stop\0", "none\0","auto\0","single\0"};
 const int triggerEdgeConfig[2] = {FALLING, RISING};
-ESP32WebServer server(80);
+WebServer server(80);
 MDNSResponder mdns;
 I2S_AdcSampler adcSampler;
 char str[50000] = "stop,0,";
