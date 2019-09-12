@@ -8,7 +8,7 @@
 #include <WiFi.h>
 #include <Arduino.h>
 #include "driver/ledc.h"
-#include "BufferedAdcSampler.h"
+#include "BufferdAdcSampler/BufferedAdcSampler.h"
 
 //change log:
 // v1 - initial version (dma problem?)
