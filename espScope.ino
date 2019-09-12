@@ -3,12 +3,12 @@
 
 
 #include <WiFiClient.h>
-#include <ESP32WebServer.h>
+#include <WebServer.h>
 #include <ESPmDNS.h>
 #include <WiFi.h>
 #include <Arduino.h>
 #include "driver/ledc.h"
-#include "BufferedAdcSampler.h"
+#include "BufferdAdcSampler/BufferedAdcSampler.h"
 
 //change log:
 // v1 - initial version (dma problem?)
@@ -44,7 +44,7 @@ typedef enum {falling = 0, rising = 1} TRIGGER_EDGE_E;
 typedef enum {stopTrig = 0, noneTrig = 1, autoTrig = 2, singleTrig = 3} TRIGGER_MODE_E;
 const char * triggerTexts[4] = {"stop\0", "none\0","auto\0","single\0"};
 const int triggerEdgeConfig[2] = {FALLING, RISING};
-ESP32WebServer server(80);
+WebServer server(80);
 MDNSResponder mdns;
 I2S_AdcSampler adcSampler;
 char str[50000] = "stop,0,";
@@ -74,6 +74,7 @@ bool ClockEnable(int pin, int Hz)
     ch_conf.duty = 1;
     ch_conf.speed_mode = LEDC_HIGH_SPEED_MODE;
     ch_conf.gpio_num = pin;
+    ch_conf.hpoint = 0;
     err = ledc_channel_config(&ch_conf);
     if (err != ESP_OK) {
         return false;
@@ -336,7 +337,7 @@ void setup(void){
   Serial.println(WiFi.localIP());
 
   //start mDNS service
-  if (mdns.begin("espscope",TCPIP_ADAPTER_IF_STA, WiFi.localIP())) {
+  if (mdns.begin("espscope")) {
 	  mdns.addService("http","tcp",80);
 	  Serial.println("Accessible as \"espscope.local/\" over mDMS service");
   }
