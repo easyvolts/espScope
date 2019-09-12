@@ -336,7 +336,7 @@ void setup(void){
   Serial.println(WiFi.localIP());
 
   //start mDNS service
-  if (mdns.begin("espscope",TCPIP_ADAPTER_IF_STA, WiFi.localIP())) {
+  if (mdns.begin("espscope")) {
 	  mdns.addService("http","tcp",80);
 	  Serial.println("Accessible as \"espscope.local/\" over mDMS service");
   }
