@@ -74,6 +74,7 @@ bool ClockEnable(int pin, int Hz)
     ch_conf.duty = 1;
     ch_conf.speed_mode = LEDC_HIGH_SPEED_MODE;
     ch_conf.gpio_num = pin;
+    ch_conf.hpoint = 0;
     err = ledc_channel_config(&ch_conf);
     if (err != ESP_OK) {
         return false;
